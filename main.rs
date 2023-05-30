@@ -1,7 +1,7 @@
 use std::io::{self, Read};
 
 fn main() {
-    let input_string = String::from("+++++[-.]");
+    let input_string = String::from("-[--->+<]>-.[---->+++++<]>-.+.++++++++++.+[---->+<]>+++.-[--->++<]>-.++++++++++.+[---->+<]>+++.[-->+++++++<]>.++.-------------.[--->+<]>---..+++++.-[---->+<]>++.+[->+++<]>.++++++++++++..---.[-->+<]>--------.");
 
     let char_array: Vec<char> = input_string.chars().collect();
     let bf_code: &[char] = &char_array;
@@ -47,38 +47,41 @@ fn main() {
                 memory[mem_ptr] = input[0];
             }
             '[' => {
-                for i in mem_ptr..30000 {
-                    if bf_code[mem_ptr] == ']' {
-                        let bracket_ptr = i;
+                if memory[mem_ptr] == 0 {
+                    let mut layers = 0;
+                    loop {
+                        if bf_code[tok_ptr] == ']' {
+                            if layers == 0 {
+                                break;
+                            }
+                            layers -= 1
+                        }
+                        tok_ptr += 1;
+                        if bf_code[tok_ptr] == '[' {
+                            layers += 1
+                        }
                     }
                 }
             }
             ']' => {
-                for i in 0..mem_ptr {
-                    if bf_code[mem_ptr] == '[' {
-                        let bracket_ptr = i;
+                if memory[mem_ptr] != 0 {
+                    let mut layers = 0;
+                    loop {
+                        if bf_code[tok_ptr] == '[' {
+                            if layers == 0 {
+                                break;
+                            }
+                            layers -= 1
+                        }
+                        tok_ptr -= 1;
+                        if bf_code[tok_ptr] == ']' {
+                            layers += 1
+                        }
                     }
                 }
             }
-            _ => panic!("Invalid token at cell: {} invalid token: {}", mem_ptr, tok_ptr),
+            _ => (),
         }
         tok_ptr += 1;
     }
 }
-
-fn dump_mem(mem: &[u8; 30000], len: usize) {
-    print!("[");
-    for i in 0..len {
-        print!("{}, ", &mem[i]);
-    }
-    print!("]");
-}
-
-// dump_mem(&memory, programm.len());
-//DEBUG TOOLS
-/*println!("\nMEMORY DUMP: ");
-println!("current_token: '{current_token}' mem_ptr: {mem_ptr}");
-println!("programm: {:?} ", programm);
-print!("memory:   "); dump_mem(&memory, programm.len());
-println!("\nEND OF MEMORY DUMP\n"); 
-*/
