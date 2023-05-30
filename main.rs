@@ -2,10 +2,7 @@ use std::io::{self, Read, Write};
 
 fn main() {
     println!("rust-brainfuck [version 1.0]");
-    println!("Type 'help' for more information.");
-    loop {
-        read_input();
-    }
+    loop { read_input(); }
 }
 
 fn read_input() {
@@ -15,12 +12,7 @@ fn read_input() {
     io::stdin()
         .read_line(&mut input)
         .expect("couldn't read input");
-    
-    if input == String::from("help\n") {
-        help();
-    } 
-
-    print!(">>> {}\n",parse_commands(input)); 
+    print!(">>> {}\n",parse_commands(input));
 }
 
 fn parse_commands(input_string: String) -> String {
@@ -106,10 +98,4 @@ fn parse_commands(input_string: String) -> String {
         tok_ptr += 1;
     }
     return output;
-}
-
-fn help() {
-    println!("\n\nEnter any of the 8 Brainfuck instructions to get interpreted");
-    println!("+ - < > . , [ ]");
-    println!("Memory is flushed after a command is interpreted\n\n");
 }
