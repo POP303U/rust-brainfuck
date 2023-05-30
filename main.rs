@@ -1,15 +1,36 @@
-use std::io::{self, Read};
+use std::io::{self, Read, Write};
 
 fn main() {
-    let input_string = String::from("-[--->+<]>-.[---->+++++<]>-.+.++++++++++.+[---->+<]>+++.-[--->++<]>-.++++++++++.+[---->+<]>+++.[-->+++++++<]>.++.-------------.[--->+<]>---..+++++.-[---->+<]>++.+[->+++<]>.++++++++++++..---.[-->+<]>--------.");
+    println!("rust-brainfuck [version 1.0]");
+    println!("Type 'help' for more information.");
+    loop {
+        read_input();
+    }
+}
 
+fn read_input() {
+    let mut input = String::from("");
+    print!(">>> ");
+    io::stdout().flush();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("couldn't read input");
+    
+    if input == String::from("help\n") {
+        help();
+    } 
+
+    print!(">>> {}\n",parse_commands(input)); 
+}
+
+fn parse_commands(input_string: String) -> String {
     let char_array: Vec<char> = input_string.chars().collect();
     let bf_code: &[char] = &char_array;
 
     let mut memory: [u8; 30000] = [0; 30000];
     let mut mem_ptr = 0;
     let mut tok_ptr = 0;
-
+    let mut output = String::from("");
     while tok_ptr < bf_code.len() {
         match bf_code[tok_ptr] {
             '>' => {
@@ -40,7 +61,7 @@ fn main() {
                     memory[mem_ptr] = memory[mem_ptr] - 1;
                 }
             }
-            '.' => print!("{}", memory[mem_ptr] as char),
+            '.' => output += &(memory[mem_ptr] as char).to_string(),
             ',' => {
                 let mut input = [0u8; 1];
                 io::stdin().read_exact(&mut input).expect("Failed to read input");
@@ -84,4 +105,11 @@ fn main() {
         }
         tok_ptr += 1;
     }
+    return output;
+}
+
+fn help() {
+    println!("\n\nEnter any of the 8 Brainfuck instructions to get interpreted");
+    println!("+ - < > . , [ ]");
+    println!("Memory is flushed after a command is interpreted\n\n");
 }
