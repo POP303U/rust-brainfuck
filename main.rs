@@ -78,7 +78,7 @@ fn dump_mem(mem: &[u8; 30000], len: usize) {
 //DEBUG TOOLS
 /*println!("\nMEMORY DUMP: ");
 println!("current_token: '{current_token}' mem_ptr: {mem_ptr}");
-    println!("programm: {:?} ", programm);
-    print!("memory:   "); dump_mem(&memory, programm.len());
-    println!("\nEND OF MEMORY DUMP\n"); 
-    */
+println!("programm: {:?} ", programm);
+print!("memory:   "); dump_mem(&memory, programm.len());
+println!("\nEND OF MEMORY DUMP\n"); 
+*/
