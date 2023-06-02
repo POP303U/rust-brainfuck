@@ -1,5 +1,6 @@
 use std::io::{self, Read, Write};
 use std::fs::File;
+use std::process::exit;
 
 fn main() {
     print!("\x1B[2J\x1B[1;1H");
@@ -18,24 +19,23 @@ fn main() {
 // | --------------- |
 
 fn choose_mode() {
-    let mut input = String::from("");
     loop {
-        io::stdin()
-            .read_line(&mut input)
-            .expect("couldn't read input");
-        if input == String::from("interpreter\n") {
-            loop {
-                interpreter();
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).expect("couldn't read input");
+
+        match input.trim() {
+            "interpreter" => {
+                loop { interpreter(); }
             }
-        } else if input == String::from("filereader\n") {
-            loop {
-                filereader();
+            "filereader" => {
+                loop { filereader(); }
             }
-    }   else {
-            println!("Invalid option");
-        }    
+            "exit" => {
+                exit(0);
+            }
+            _ => main(),
+        } 
     }
-    
 }
 
 //  | ---------------- |
@@ -49,8 +49,8 @@ fn filereader() {
     if input == String::from("exit\n") {
         main();
     }
-    let file_path = input.trim_end_matches('\n');
-    let mut file = File::open(file_path);
+    let file_path = input.trim();
+    let file = File::open(file_path);
 
     file.expect("File not found").read_to_string(&mut input);
 
@@ -86,7 +86,7 @@ fn parse_tokens(input_string: String) -> String {
     while tok_ptr < bf_code.len() {
         match bf_code[tok_ptr] {
             '>' => {
-                if mem_ptr == 30000 {
+                if mem_ptr == 29999 {
                     mem_ptr = 0;
                 } else {
                     mem_ptr += 1;
@@ -94,7 +94,7 @@ fn parse_tokens(input_string: String) -> String {
             }
             '<' => {
                 if mem_ptr == 0 {
-                    mem_ptr = 30000;
+                    mem_ptr = 29999;
                 } else {
                     mem_ptr -= 1;
                 }
@@ -114,7 +114,7 @@ fn parse_tokens(input_string: String) -> String {
                 }
             }
             '.' => {
-                output += &(memory[mem_ptr] as char).to_string().trim_end_matches('\n');
+                output += &(memory[mem_ptr] as char).to_string().trim();
             }
             ',' => {
                 let mut input = [0u8; 1];
@@ -168,6 +168,7 @@ fn stdout_print(input: String) {
     print!("{}",input);
     io::stdout().flush();
 }
+
 /* dont need this
 fn help() {
     println!("Enter any of the 8 Brainfuck instructions to get interpreted");
