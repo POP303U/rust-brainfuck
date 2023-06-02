@@ -54,8 +54,7 @@ fn filereader() {
 
     file.expect("File not found").read_to_string(&mut input);
 
-    println!("output: {}",parse_tokens(input));
-}
+    println!("output: {}",parse_tokens(input)); }
 
 //  | ----------------- |
 //  |    INTERPRETER    |
