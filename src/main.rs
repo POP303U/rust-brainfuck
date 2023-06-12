@@ -1,5 +1,5 @@
-use std::io::{self, Read, Write};
 use std::fs::File;
+use std::io::{self, Read, Write};
 use std::process::exit;
 
 fn main() {
@@ -11,7 +11,6 @@ fn main() {
     println!("#---------------------------------------------------#");
     stdout_print(String::from("choose mode: "));
     choose_mode();
-    
 }
 
 // | --------------- |
@@ -21,31 +20,32 @@ fn main() {
 fn choose_mode() {
     loop {
         let mut input = String::new();
-        io::stdin().read_line(&mut input).expect("couldn't read input");
-
+        io::stdin()
+            .read_line(&mut input)
+            .expect("couldn't read input");
         match input.trim() {
-            "interpreter" => {
-                loop { interpreter(); }
-            }
-            "filereader" => {
-                loop { filereader(); }
-            }
-            "exit" => {
-                exit(0);
-            }
+            "interpreter" => loop {
+                interpreter();
+            },
+            "filereader" => loop {
+                filereader();
+            },
+            "exit" => exit(0),
             _ => main(),
-        } 
+        }
     }
 }
 
 //  | ---------------- |
 //  |    FILEREADER    |
-//  | ---------------- | 
+//  | ---------------- |
 
 fn filereader() {
     stdout_print(String::from("Enter file name: "));
     let mut input = String::from("");
-    io::stdin().read_line(&mut input).expect("couldn't read input");
+    io::stdin()
+        .read_line(&mut input)
+        .expect("couldn't read input");
     if input == String::from("exit\n") {
         main();
     }
@@ -54,21 +54,23 @@ fn filereader() {
 
     file.expect("File not found").read_to_string(&mut input);
 
-    println!("output: {}",parse_tokens(input)); 
+    println!("output: {}", parse_tokens(input));
 }
 
 //  | ----------------- |
 //  |    INTERPRETER    |
-//  | ----------------- | 
+//  | ----------------- |
 
 fn interpreter() {
     let mut input = String::from("");
     stdout_print(String::from(">>> "));
-    io::stdin().read_line(&mut input).expect("couldn't read input");
+    io::stdin()
+        .read_line(&mut input)
+        .expect("couldn't read input");
     if input == String::from("exit\n") {
         main();
     }
-    println!("output: {}",parse_tokens(input));
+    println!("output: {}", parse_tokens(input));
 }
 
 //  | ---------------- |
@@ -90,7 +92,7 @@ fn parse_tokens(input_string: String) -> String {
                     mem_ptr = 0;
                 } else {
                     mem_ptr += 1;
-                } 
+                }
             }
             '<' => {
                 if mem_ptr == 0 {
@@ -119,7 +121,9 @@ fn parse_tokens(input_string: String) -> String {
             ',' => {
                 let mut input = [0u8; 1];
                 stdout_print(String::from("input: "));
-                io::stdin().read_exact(&mut input).expect("Failed to read input");
+                io::stdin()
+                    .read_exact(&mut input)
+                    .expect("Failed to read input");
                 memory[mem_ptr] = input[0];
             }
             '[' => {
@@ -165,7 +169,7 @@ fn parse_tokens(input_string: String) -> String {
 
 // Just a better way to print, normal way sucks
 fn stdout_print(input: String) {
-    print!("{}",input);
+    print!("{}", input);
     io::stdout().flush();
 }
 
