@@ -65,8 +65,9 @@ fn filereader() -> bool {
         }
     };
 
+    let temp = String::from("hello");
     file.read_to_string(&mut input).expect("Failed to read the file for some reason");
-    println!("output: {}", parse_tokens(input));
+    println!("output: {}", parse_tokens(input, temp));
     false
 }
 
@@ -75,15 +76,22 @@ fn filereader() -> bool {
 //  | ----------------- |
 
 fn interpreter() -> bool {
-    let mut input = String::from("");
+    let mut input1 = String::new();
     stdout_print(String::from(">>> "));
     io::stdin()
-        .read_line(&mut input)
-        .expect("couldn't read input");
-    if input.trim() == "exit" {
+        .read_line(&mut input1)
+        .expect("couldn't read input1");
+    if input1.trim() == "exit" {
         return true;
     }
-    println!("output: {}", parse_tokens(input));
+
+    stdout_print(String::from("input: "));
+    let mut input2 = String::new();
+    io::stdin()
+        .read_line(&mut input2)
+        .expect("couldn't read input2");
+
+    println!("output: {}", parse_tokens(input1, input2));
     false
 }
 
@@ -91,13 +99,15 @@ fn interpreter() -> bool {
 //  |   TOKEN PARSER   |
 //  | ---------------- |
 
-fn parse_tokens(input_string: String) -> String {
+fn parse_tokens(input_string: String, input: String) -> String {
     let bf_code: Vec<char> = input_string.chars().collect();
+    let mut input: Vec<char> = input.chars().collect();
 
+    let mut output = String::from("");
     let mut memory: [u8; 30000] = [0; 30000];
     let mut mem_ptr = 0;
     let mut tok_ptr = 0;
-    let mut output = String::from("");
+    let mut char_ptr = 0;
 
     while tok_ptr < bf_code.len() {
         match bf_code[tok_ptr] {
@@ -133,12 +143,12 @@ fn parse_tokens(input_string: String) -> String {
                 output += (memory[mem_ptr] as char).to_string().trim();
             }
             ',' => {
-                let mut input = [0u8; 1];
-                stdout_print(String::from("input: "));
-                io::stdin()
-                    .read_exact(&mut input)
-                    .expect("Failed to read input");
-                memory[mem_ptr] = input[0];
+                memory[mem_ptr] = input[char_ptr] as u8;
+                if char_ptr < input.len() - 1 {
+                    char_ptr += 1;
+                } else {
+                    input = vec![' ',' '];
+                }
             }
             '[' => {
                 if memory[mem_ptr] == 0 {
