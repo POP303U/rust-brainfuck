@@ -34,7 +34,7 @@ fn main() {
 fn fancy_screen() {
     print!("\x1B[2J\x1B[1;1H");
     println!("#---------------------------------------------------#");
-    println!("|            rust-brainfuck [version 1.1]           |");
+    println!("|            rust-brainfuck [version 1.2]           |");
     println!("| choose mode to enter: 'interpreter', 'filereader' |");
     println!("| enter the command 'exit' to return to this menu   |");
     println!("#---------------------------------------------------#");

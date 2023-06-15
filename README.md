@@ -1,4 +1,4 @@
-# rust-brainfuck
+# rust-brainfuck version 1.2
 Simple brainfuck interpreter and filereader written in Rust.
 
 **Features**:
