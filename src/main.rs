@@ -25,6 +25,13 @@ fn main() {
                      break;
                  };
              },
+             /*
+             "help" => loop {
+                 if help() {
+                     break;
+                 };
+             },
+             */
              "exit" => exit(0),
              _ => return,
         }
@@ -33,11 +40,11 @@ fn main() {
 
 fn fancy_screen() {
     print!("\x1B[2J\x1B[1;1H");
-    println!("#---------------------------------------------------#");
-    println!("|            rust-brainfuck [version 1.2]           |");
-    println!("| choose mode to enter: 'interpreter', 'filereader' |");
-    println!("| enter the command 'exit' to return to this menu   |");
-    println!("#---------------------------------------------------#");
+    println!("#-----------------------------------------------------------#");
+    println!("|               rust-brainfuck [version 1.2]                |");
+    println!("| choose mode to enter: 'interpreter', 'filereader', 'help' |");
+    println!("|      enter the command 'exit' to return to this menu      |");
+    println!("#-----------------------------------------------------------#");
 }
 
 //  | ---------------- |
@@ -95,6 +102,22 @@ fn interpreter() -> bool {
     false
 }
 
+fn help() -> bool {
+    println!("Enter any of the 8 Brainfuck instructions to get interpreted");
+    println!("+ - < > . , [ ]");
+    println!("Memory is flushed after a command is interpreted");
+
+    let mut input1 = String::new();
+    stdout_print(String::from(">>> "));
+    io::stdin()
+        .read_line(&mut input1)
+        .expect("couldn't read input1");
+    if input1.trim() == "exit" {
+        true
+    } else {
+        true
+    }
+}
 //  | ---------------- |
 //  |   TOKEN PARSER   |
 //  | ---------------- |
