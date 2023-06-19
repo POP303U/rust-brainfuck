@@ -25,19 +25,17 @@ fn main() {
                      break;
                  };
              },
-             /*
              "help" => loop {
                  if help() {
                      break;
                  };
              },
-             */
+             
              "exit" => exit(0),
              _ => return,
         }
     }
 }
-
 fn fancy_screen() {
     print!("\x1B[2J\x1B[1;1H");
     println!("#-----------------------------------------------------------#");
@@ -103,19 +101,17 @@ fn interpreter() -> bool {
 }
 
 fn help() -> bool {
-    println!("Enter any of the 8 Brainfuck instructions to get interpreted");
+    println!("\nEnter any of the 8 Brainfuck instructions to get interpreted");
     println!("+ - < > . , [ ]");
-    println!("Memory is flushed after a command is interpreted");
+    println!("Memory is flushed after a command is interpreted\n");
 
     let mut input1 = String::new();
-    stdout_print(String::from(">>> "));
+    stdout_print(String::from("Press any button to exit: "));
     io::stdin()
         .read_line(&mut input1)
         .expect("couldn't read input1");
-    if input1.trim() == "exit" {
-        true
-    } else {
-        true
+    match input1 {
+        _ => true // the most hacky code ever written
     }
 }
 //  | ---------------- |
