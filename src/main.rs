@@ -1,6 +1,5 @@
 use std::fs::File;
 use std::io::{self, Read, Write};
-use std::process::exit;
 
 // | --------------- |
 // |    MAIN LOOP    |
@@ -30,8 +29,6 @@ fn main() {
                      break;
                  };
              },
-             
-             "exit" => exit(0),
              _ => return,
         }
     }
@@ -52,7 +49,7 @@ fn fancy_screen() {
 fn filereader() -> bool {
     stdout_print(String::from("Enter file name: "));
 
-    let mut input = String::from("");
+    let mut input = String::new();
     io::stdin()
         .read_line(&mut input).expect("couldn't read input");
     if input.trim() == "exit" {
@@ -122,7 +119,7 @@ fn parse_tokens(input_string: String, input: String) -> String {
     let bf_code: Vec<char> = input_string.chars().collect();
     let mut input: Vec<char> = input.chars().collect();
 
-    let mut output = String::from("");
+    let mut output = String::new();
     let mut memory: [u8; 30000] = [0; 30000];
     let mut mem_ptr = 0;
     let mut tok_ptr = 0;
@@ -211,8 +208,7 @@ fn parse_tokens(input_string: String, input: String) -> String {
 }
 
 // Hacky workaround for io::stdin being called first
-fn stdout_print(input: String) {
-    print!("{}", input);
+fn stdout_print(input: String) { print!("{}", input);
     io::stdout().flush().expect("Failed to flush buffer");
 }
 
