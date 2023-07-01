@@ -14,25 +14,26 @@ fn main() {
             .read_line(&mut input)
             .expect("couldn't read input");
         match input.trim() {
-             "interpreter" => loop {
-                 if interpreter() {
-                     break;
-                 }
-             },
-             "filereader" => loop {
-                 if filereader() {
-                     break;
-                 };
-             },
-             "help" => loop {
-                 if help() {
-                     break;
-                 };
-             },
-             _ => return,
+            "interpreter" => loop {
+                if interpreter() {
+                    break;
+                }
+            },
+            "filereader" => loop {
+                if filereader() {
+                    break;
+                };
+            },
+            "help" => loop {
+                if help() {
+                    break;
+                };
+            },
+            _ => return,
         }
     }
 }
+
 fn fancy_screen() {
     print!("\x1B[2J\x1B[1;1H");
     println!("#-----------------------------------------------------------#");
@@ -53,7 +54,7 @@ fn filereader() -> bool {
     io::stdin()
         .read_line(&mut input).expect("couldn't read input");
     if input.trim() == "exit" {
-        return true; 
+        return true;
     }
 
     let file_path = input.trim();
