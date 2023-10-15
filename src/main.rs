@@ -52,7 +52,8 @@ fn filereader() -> bool {
 
     let mut input = String::new();
     io::stdin()
-        .read_line(&mut input).expect("couldn't read input");
+        .read_line(&mut input)
+        .expect("couldn't read input");
     if input.trim() == "exit" {
         return true;
     }
@@ -69,7 +70,8 @@ fn filereader() -> bool {
     };
 
     let temp = String::from("hello");
-    file.read_to_string(&mut input).expect("Failed to read the file for some reason");
+    file.read_to_string(&mut input)
+        .expect("Failed to read the file for some reason");
     println!("output: {}", parse_tokens(input, temp));
     false
 }
@@ -109,7 +111,7 @@ fn help() -> bool {
         .read_line(&mut input1)
         .expect("couldn't read input1");
     match input1 {
-        _ => true // the most hacky code ever written
+        _ => true, // the most hacky code ever written
     }
 }
 //  | ---------------- |
@@ -164,7 +166,7 @@ fn parse_tokens(input_string: String, input: String) -> String {
                 if char_ptr < input.len() - 1 {
                     char_ptr += 1;
                 } else {
-                    input = vec![' ',' '];
+                    input = vec![' ', ' '];
                 }
             }
             '[' => {
@@ -209,7 +211,8 @@ fn parse_tokens(input_string: String, input: String) -> String {
 }
 
 // Hacky workaround for io::stdin being called first
-fn stdout_print(input: String) { print!("{}", input);
+fn stdout_print(input: String) {
+    print!("{}", input);
     io::stdout().flush().expect("Failed to flush buffer");
 }
 
