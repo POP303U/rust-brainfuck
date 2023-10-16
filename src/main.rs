@@ -1,239 +1,145 @@
-use std::fs::File;
-use std::io::{self, Read, Write};
+use std::{env, fs::File, io::Read, path::Path};
 
-// | --------------- |
-// |    MAIN LOOP    |
-// | --------------- |
+struct Brainfuck {
+    code: Vec<u8>,
+    memory: Vec<u8>,
+    pointer: i32,
+}
+
+impl Brainfuck {
+    fn new(code: Vec<u8>) -> Brainfuck {
+        Brainfuck {
+            code,
+            pointer: 0,
+            memory: vec![0],
+        }
+    }
+
+    fn plus(&mut self) {
+        if self.memory[self.pointer as usize] == 255 {
+            self.memory[self.pointer as usize] = 0;
+            return;
+        }
+        self.memory[self.pointer as usize] += 1;
+    }
+
+    fn minus(&mut self) {
+        if self.memory[self.pointer as usize] == 0 {
+            self.memory[self.pointer as usize] = 255;
+            return;
+        }
+        self.memory[self.pointer as usize] -= 1;
+    }
+
+    fn input(&mut self) {
+        self.memory[self.pointer as usize] -= 1;
+    }
+
+    fn output(&mut self) {
+        print!("{}", self.memory[self.pointer as usize] as u8 as char);
+    }
+
+    fn move_right(&mut self) {
+        self.pointer += 1;
+        if self.memory.len() < self.pointer as usize + 1 {
+            self.memory.push(0);
+        }
+    }
+
+    fn move_left(&mut self) {
+        if self.pointer != 0 {
+            self.pointer -= 1;
+        }
+    }
+
+    fn sanitize_code(&mut self) {
+        self.code.retain(|&c| {
+            c == b'+'
+                || c == b'-'
+                || c == b'.'
+                || c == b'!'
+                || c == b','
+                || c == b'['
+                || c == b']'
+                || c == b'<'
+                || c == b'>'
+        });
+    }
+
+    fn run(&mut self) {
+        self.sanitize_code();
+        let mut bracket_vec: Vec<i32> = Vec::new();
+        let mut i: usize = 0;
+        let opcodes = self.code.clone();
+        while i < opcodes.len() {
+            match opcodes[i] {
+                b'+' => self.plus(),
+                b'-' => self.minus(),
+                b'>' => self.move_right(),
+                b'<' => self.move_left(),
+                b'.' => self.output(),
+                b',' => self.input(),
+                b'[' => {
+                    if self.memory[self.pointer as usize] != 0 {
+                        bracket_vec.push(i as i32);
+                    } else {
+                        bracket_vec.pop();
+                    }
+                }
+                b']' => {
+                    if self.memory[self.pointer as usize] != 0 {
+                        match bracket_vec.last() {
+                            Some(&index) => {
+                                i = index as usize;
+                            }
+                            None => println!(""),
+                        };
+                    } else {
+                        bracket_vec.pop();
+                    }
+                }
+                _ => panic!("ERROR: Invalid token ran in function: Brainfuck::run()"),
+            }
+            i += 1;
+        }
+    }
+}
 
 fn main() {
-    loop {
-        fancy_screen();
-        stdout_print(String::from("choose mode: "));
-        let mut input = String::new();
-        io::stdin()
-            .read_line(&mut input)
-            .expect("couldn't read input");
-        match input.trim() {
-            "interpreter" => loop {
-                if interpreter() {
-                    break;
-                }
-            },
-            "filereader" => loop {
-                if filereader() {
-                    break;
-                };
-            },
-            "help" => loop {
-                if help() {
-                    break;
-                };
-            },
-            _ => return,
-        }
-    }
-}
+    let args: Vec<String> = env::args().collect();
+    let mut file = File::open(Path::new(&args[1])).expect("ERROR: File not found");
+    let mut file_content = Vec::new();
 
-fn fancy_screen() {
-    print!("\x1B[2J\x1B[1;1H");
-    println!("#-----------------------------------------------------------#");
-    println!("|               rust-brainfuck [version 1.2]                |");
-    println!("| choose mode to enter: 'interpreter', 'filereader', 'help' |");
-    println!("|      enter the command 'exit' to return to this menu      |");
-    println!("#-----------------------------------------------------------#");
-}
-
-//  | ---------------- |
-//  |    FILEREADER    |
-//  | ---------------- |
-
-fn filereader() -> bool {
-    stdout_print(String::from("Enter file name: "));
-
-    let mut input = String::new();
-    io::stdin()
-        .read_line(&mut input)
-        .expect("couldn't read input");
-    if input.trim() == "exit" {
-        return true;
-    }
-
-    let file_path = input.trim();
-    let file_result = File::open(file_path);
-
-    let mut file = match file_result {
-        Ok(file) => file,
-        Err(error) => {
-            println!("Error opening file! {}", error);
-            return false;
-        }
+    match file.read_to_end(&mut file_content) {
+        Err(why) => panic!("ERROR: Couldn't read file, why: {why}"),
+        Ok(_) => print!("{}", String::from_utf8_lossy(&file_content)),
     };
 
-    let temp = String::from("hello");
-    file.read_to_string(&mut input)
-        .expect("Failed to read the file for some reason");
-    println!("output: {}", parse_tokens(input, temp));
-    false
+    let mut bf = Brainfuck::new(file_content);
+    bf.run();
 }
 
-//  | ----------------- |
-//  |    INTERPRETER    |
-//  | ----------------- |
-
-fn interpreter() -> bool {
-    let mut input1 = String::new();
-    stdout_print(String::from(">>> "));
-    io::stdin()
-        .read_line(&mut input1)
-        .expect("couldn't read input1");
-    if input1.trim() == "exit" {
-        return true;
-    }
-
-    stdout_print(String::from("input: "));
-    let mut input2 = String::new();
-    io::stdin()
-        .read_line(&mut input2)
-        .expect("couldn't read input2");
-
-    println!("output: {}", parse_tokens(input1, input2));
-    false
+/*
+ *enum Color {
+    Red,
+    Blue,
+    Green,
 }
 
-fn help() -> bool {
-    println!("\nEnter any of the 8 Brainfuck instructions to get interpreted");
-    println!("+ - < > . , [ ]");
-    println!("Memory is flushed after a command is interpreted\n");
 
-    let mut input1 = String::new();
-    stdout_print(String::from("Press any button to exit: "));
-    io::stdin()
-        .read_line(&mut input1)
-        .expect("couldn't read input1");
-    match input1 {
-        _ => true, // the most hacky code ever written
-    }
-}
-//  | ---------------- |
-//  |   TOKEN PARSER   |
-//  | ---------------- |
-
-fn parse_tokens(input_string: String, input: String) -> String {
-    let bf_code: Vec<char> = input_string.chars().collect();
-    let mut input: Vec<char> = input.chars().collect();
-
-    let mut output = String::new();
-    let mut memory: [u8; 30000] = [0; 30000];
-    let mut mem_ptr = 0;
-    let mut tok_ptr = 0;
-    let mut char_ptr = 0;
-
-    while tok_ptr < bf_code.len() {
-        match bf_code[tok_ptr] {
-            '>' => {
-                if mem_ptr == 29999 {
-                    mem_ptr = 0;
-                } else {
-                    mem_ptr += 1;
-                }
-            }
-            '<' => {
-                if mem_ptr == 0 {
-                    mem_ptr = 29999;
-                } else {
-                    mem_ptr -= 1;
-                }
-            }
-            '+' => {
-                if memory[mem_ptr] == 255 {
-                    memory[mem_ptr] = 0;
-                } else {
-                    memory[mem_ptr] += 1;
-                }
-            }
-            '-' => {
-                if memory[mem_ptr] == 0 {
-                    memory[mem_ptr] = 255;
-                } else {
-                    memory[mem_ptr] -= 1;
-                }
-            }
-            '.' => {
-                output += (memory[mem_ptr] as char).to_string().trim();
-            }
-            ',' => {
-                memory[mem_ptr] = input[char_ptr] as u8;
-                if char_ptr < input.len() - 1 {
-                    char_ptr += 1;
-                } else {
-                    input = vec![' ', ' '];
-                }
-            }
-            '[' => {
-                if memory[mem_ptr] == 0 {
-                    let mut layers = 0;
-                    loop {
-                        if bf_code[tok_ptr] == ']' {
-                            if layers == 0 {
-                                break;
-                            }
-                            layers -= 1
-                        }
-                        tok_ptr += 1;
-                        if bf_code[tok_ptr] == '[' {
-                            layers += 1
-                        }
-                    }
-                }
-            }
-            ']' => {
-                if memory[mem_ptr] != 0 {
-                    let mut layers = 0;
-                    loop {
-                        if bf_code[tok_ptr] == '[' {
-                            if layers == 0 {
-                                break;
-                            }
-                            layers -= 1
-                        }
-                        tok_ptr -= 1;
-                        if bf_code[tok_ptr] == ']' {
-                            layers += 1
-                        }
-                    }
-                }
-            }
-            _ => (),
+impl Color {
+    fn purple_part(&self) -> bool {
+        match self {
+            Color::Red => true,
+            Color::Blue => true,
+            _ => false,
         }
-        tok_ptr += 1;
     }
-    output
-}
-
-// Hacky workaround for io::stdin being called first
-fn stdout_print(input: String) {
-    print!("{}", input);
-    io::stdout().flush().expect("Failed to flush buffer");
-}
-
-/* dont need this
-fn help() {
-    println!("Enter any of the 8 Brainfuck instructions to get interpreted");
-    println!("+ - < > . , [ ]");
-    println!("Memory is flushed after a command is interpreted");
-}
-
-println!("Type 'help' or 'version' for more information.");
-
-fn version() {
-    println!("rust-brainfuck [version 1.0]");
-}
-
-    if input == String::from("help\n") {
-        help();
-    } else if input == String::from("version\n") {
-        version();
-    } else {
-
+    fn is_green(&self) -> bool {
+        if let Color::Green = self {
+            return true;
+        }
+        return false;
     }
-    */
+}
+*/

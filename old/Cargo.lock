@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "implement"
+name = "rust-brainfuck"
 version = "0.1.0"
