@@ -1,9 +1,14 @@
 use std::{
-    env,
     fs::File,
-    io::{self, Read},
-    path::Path,
+    io::{self, Read, Write},
 };
+
+macro_rules! fprint {
+    ($($arg:tt)*) => {{
+        print!($($arg)*);
+        io::stdout().flush().expect("ERROR: Failed to flush stdout");
+    }};
+}
 
 struct Brainfuck {
     code: Vec<u8>,
@@ -130,19 +135,89 @@ impl Brainfuck {
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    loop {
+        fancy_screen();
+        fprint!("Choose mode: ");
 
-    if args.len() < 2 {
-        panic!("ERROR: No arguments provided\nCorrect usage: cargo run -- <input.bf>");
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("couldn't read input");
+
+        match input.trim() {
+            "interpreter" => loop {
+                mode_interpreter()
+            },
+            "filereader" => loop {
+                mode_filereader().expect("Can't find file");
+            },
+            "help" => loop {
+                mode_help();
+            },
+            _ => return,
+        }
     }
-    let mut file = File::open(Path::new(&args[1])).expect("ERROR: File not found");
-    let mut file_content = Vec::new();
+}
 
-    match file.read_to_end(&mut file_content) {
-        Err(why) => eprintln!("ERROR: Couldn't read file, why: {why}"),
-        Ok(_) => println!("SUCCESS: Successfully read file, executing..."),
-    };
+fn mode_filereader() -> Result<(), io::Error> {
+    fprint!("Enter file path: ");
+    let mut user_input = String::new();
+    io::stdin()
+        .read_line(&mut user_input)
+        .expect("ERROR: Couldn't read stdin");
+
+    if user_input.trim() == "exit" {
+        main();
+    }
+
+    let file_path = user_input.trim();
+    let mut file = File::open(file_path)?;
+    let mut file_content = Vec::new();
+    file.read_to_end(&mut file_content)?;
 
     let mut bf = Brainfuck::new(file_content);
     bf.run();
+
+    println!("");
+    Ok(())
+}
+
+fn mode_interpreter() {
+    let mut input = String::new();
+    fprint!("\n>>> ");
+    io::stdin()
+        .read_line(&mut input)
+        .expect("couldn't read var:input");
+
+    let mut bf = Brainfuck::new(input.clone().into_bytes());
+    bf.run();
+
+    if input.trim() == "exit" {
+        main();
+    }
+}
+
+fn mode_help() {
+    print!("\x1B[2J\x1B[1;1H");
+    println!("\nEnter any of the 8 Brainfuck instructions to get interpreted");
+    println!("+ - < > . , [ ]");
+    println!("Memory is flushed after a command is interpreted\n");
+
+    let mut user_input = String::new();
+    fprint!("Press Enter to exit: ");
+    io::stdin()
+        .read_line(&mut user_input)
+        .expect("couldn't read var:user_input");
+    match user_input {
+        _ => main(), // the most hacky code ever written
+    }
+}
+
+fn fancy_screen() {
+    print!("\x1B[2J\x1B[1;1H");
+    println!("#-----------------------------------------------------------#");
+    println!("|               rust-brainfuck [version 2.0]                |");
+    println!("| choose mode to enter: 'interpreter', 'filereader', 'help' |");
+    println!("|      enter the command 'exit' to return to this menu      |");
+    println!("#-----------------------------------------------------------#");
 }
