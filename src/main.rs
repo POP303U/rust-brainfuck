@@ -17,24 +17,24 @@ impl Brainfuck {
         Brainfuck {
             code,
             pointer: 0,
-            memory: vec![0],
+            memory: vec![0; 30000],
         }
     }
 
     fn plus(&mut self) {
         if self.memory[self.pointer as usize] == 255 {
             self.memory[self.pointer as usize] = 0;
-            return;
+        } else {
+            self.memory[self.pointer as usize] += 1;
         }
-        self.memory[self.pointer as usize] += 1;
     }
 
     fn minus(&mut self) {
         if self.memory[self.pointer as usize] == 0 {
             self.memory[self.pointer as usize] = 255;
-            return;
+        } else {
+            self.memory[self.pointer as usize] -= 1;
         }
-        self.memory[self.pointer as usize] -= 1;
     }
 
     fn input(&mut self) {
@@ -50,25 +50,26 @@ impl Brainfuck {
     }
 
     fn move_right(&mut self) {
-        self.pointer += 1;
-        if self.memory.len() < self.pointer as usize + 1 {
-            self.memory.push(0);
+        if self.pointer == 30000 {
+            self.pointer = 0;
         }
+        self.pointer += 1;
     }
 
     fn move_left(&mut self) {
-        if self.pointer != 0 {
+        if self.pointer == 0 {
+            self.pointer = 30000;
+        } else {
             self.pointer -= 1;
         }
     }
 
     fn sanitize_code(&mut self) {
         self.code.retain(|&c| {
-            c == b'+'
+            c == b','
+                || c == b'+'
                 || c == b'-'
                 || c == b'.'
-                || c == b'!'
-                || c == b','
                 || c == b'['
                 || c == b']'
                 || c == b'<'
@@ -127,7 +128,7 @@ fn main() {
 
     match file.read_to_end(&mut file_content) {
         Err(why) => eprintln!("ERROR: Couldn't read file, why: {why}"),
-        Ok(_) => print!("{}", String::from_utf8_lossy(&file_content)),
+        Ok(_) => println!("SUCCESS: Successfully read file, executing..."),
     };
 
     let mut bf = Brainfuck::new(file_content);
