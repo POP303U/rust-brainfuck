@@ -3,7 +3,6 @@ use std::{
     fs::File,
     io::{self, Read},
     path::Path,
-    process::exit,
 };
 
 struct Brainfuck {
@@ -50,7 +49,7 @@ impl Brainfuck {
     }
 
     fn move_right(&mut self) {
-        if self.pointer == 30000 {
+        if self.pointer == 29999 {
             self.pointer = 0;
         }
         self.pointer += 1;
@@ -58,7 +57,7 @@ impl Brainfuck {
 
     fn move_left(&mut self) {
         if self.pointer == 0 {
-            self.pointer = 30000;
+            self.pointer = 29999;
         } else {
             self.pointer -= 1;
         }
@@ -79,7 +78,6 @@ impl Brainfuck {
 
     fn run(&mut self) {
         self.sanitize_code();
-        let mut bracket_vec: Vec<i32> = Vec::new();
         let mut i: usize = 0;
         let opcodes = self.code.clone();
         while i < opcodes.len() {
@@ -91,25 +89,40 @@ impl Brainfuck {
                 b'.' => self.output(),
                 b',' => self.input(),
                 b'[' => {
-                    if self.memory[self.pointer as usize] != 0 {
-                        bracket_vec.push(i as i32);
-                    } else {
-                        bracket_vec.pop();
+                    if self.memory[self.pointer as usize] == 0 {
+                        let mut layers = 0;
+                        loop {
+                            if opcodes[i] == b']' {
+                                if layers == 0 {
+                                    break;
+                                }
+                                layers -= 1
+                            }
+                            i += 1;
+                            if opcodes[i] == b'[' {
+                                layers += 1
+                            }
+                        }
                     }
                 }
                 b']' => {
                     if self.memory[self.pointer as usize] != 0 {
-                        match bracket_vec.last() {
-                            Some(&index) => {
-                                i = index as usize;
+                        let mut layers = 0;
+                        loop {
+                            if opcodes[i] == b'[' {
+                                if layers == 0 {
+                                    break;
+                                }
+                                layers -= 1
                             }
-                            None => println!(""),
-                        };
-                    } else {
-                        bracket_vec.pop();
+                            i -= 1;
+                            if opcodes[i] == b']' {
+                                layers += 1
+                            }
+                        }
                     }
                 }
-                _ => panic!("ERROR: Invalid token ran in function: Brainfuck::run()"),
+                _ => eprintln!("ERROR: tried to execute invalid token this should NEVER happen"),
             }
             i += 1;
         }
@@ -120,8 +133,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() < 2 {
-        eprintln!("ERROR: No arguments provided\nCorrect usage: cargo run -- <input.bf>");
-        exit(1);
+        panic!("ERROR: No arguments provided\nCorrect usage: cargo run -- <input.bf>");
     }
     let mut file = File::open(Path::new(&args[1])).expect("ERROR: File not found");
     let mut file_content = Vec::new();
