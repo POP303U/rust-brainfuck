@@ -1,4 +1,10 @@
-use std::{env, fs::File, io::Read, path::Path};
+use std::{
+    env,
+    fs::File,
+    io::{self, Read},
+    path::Path,
+    process::exit,
+};
 
 struct Brainfuck {
     code: Vec<u8>,
@@ -32,7 +38,11 @@ impl Brainfuck {
     }
 
     fn input(&mut self) {
-        self.memory[self.pointer as usize] -= 1;
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("ERROR: Failed to read input");
+        self.memory[self.pointer as usize] = input.as_bytes()[0];
     }
 
     fn output(&mut self) {
@@ -107,39 +117,19 @@ impl Brainfuck {
 
 fn main() {
     let args: Vec<String> = env::args().collect();
+
+    if args.len() < 2 {
+        eprintln!("ERROR: No arguments provided\nCorrect usage: cargo run -- <input.bf>");
+        exit(1);
+    }
     let mut file = File::open(Path::new(&args[1])).expect("ERROR: File not found");
     let mut file_content = Vec::new();
 
     match file.read_to_end(&mut file_content) {
-        Err(why) => panic!("ERROR: Couldn't read file, why: {why}"),
+        Err(why) => eprintln!("ERROR: Couldn't read file, why: {why}"),
         Ok(_) => print!("{}", String::from_utf8_lossy(&file_content)),
     };
 
     let mut bf = Brainfuck::new(file_content);
     bf.run();
 }
-
-/*
- *enum Color {
-    Red,
-    Blue,
-    Green,
-}
-
-
-impl Color {
-    fn purple_part(&self) -> bool {
-        match self {
-            Color::Red => true,
-            Color::Blue => true,
-            _ => false,
-        }
-    }
-    fn is_green(&self) -> bool {
-        if let Color::Green = self {
-            return true;
-        }
-        return false;
-    }
-}
-*/
