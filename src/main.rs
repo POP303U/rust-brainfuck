@@ -127,7 +127,7 @@ impl Brainfuck {
                         }
                     }
                 }
-                _ => eprintln!("ERROR: tried to execute invalid token this should NEVER happen"),
+                _ => eprintln!("This can happen but i don't know how"),
             }
             i += 1;
         }
